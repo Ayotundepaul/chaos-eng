@@ -1,0 +1,39 @@
+{
+    "version": "1.0.0",
+    "title": "Pod termination should not disrupt the service",
+    "description": "Ensure that killing a pod does not result in user-facing errors",
+    "tags": ["k8s", "pod", "disruption"],
+    "steady-state-hypothesis": {
+      "title": "Service is normal",
+      "probes": [
+        {
+          "name": "app-responding",
+          "type": "probe",
+          "tolerance": true,
+          "provider": {
+            "type": "http",
+            "url": "http://your-app-service-url/health",
+            "timeout": 5
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "terminate-pod",
+        "provider": {
+          "type": "python",
+          "module": "chaosk8s.pod.actions",
+          "func": "terminate_pods",
+          "arguments": {
+            "label_selector": "app=your-app-label",
+            "name_pattern": "your-app-name-.*",
+            "rand": true
+          }
+        }
+      }
+    ],
+    "rollbacks": []
+  }
+  
